@@ -1,22 +1,10 @@
-'''
-Author: yuheng li a1793138
-Date: 2025-03-17 20:14:46
-LastEditors: yuheng 
-LastEditTime: 2025-03-17 20:33:20
-FilePath: \CNA\CNAass1\Proxy.py
-Description: 
-
-Copyright (c) ${2024} by ${yuheng li}, All Rights Reserved. 
-'''
-#what i need to do is web server--process and forward requests to the web server
-#what HTTP requests the browser sends to the proxy
-#
 # Include the libraries for socket and system calls
 import socket
 import sys
 import os
 import argparse
 import re
+#python Proxy.py localhost 8080
 
 # 1MB buffer size
 BUFFER_SIZE = 1000000
@@ -30,11 +18,13 @@ proxyHost = args.hostname
 proxyPort = int(args.port)
 
 # Create a server socket, bind it to a port and start listening
+#Formatted string literals
 try:
   # Create a server socket
-  # ~~~~ INSERT CODE ~~~~
-  # ~~~~ END CODE INSERT ~~~~
+  server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+  server_socket.bind((proxyHost, proxyPort))
   print ('Created socket')
+  print(f"{proxyHost}:{proxyPort}...")
 except:
   print ('Failed to create socket')
   sys.exit()
