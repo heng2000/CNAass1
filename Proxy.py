@@ -38,8 +38,7 @@ except:
 
 try:
   # Listen on the server socket
-  # ~~~~ INSERT CODE ~~~~
-  # ~~~~ END CODE INSERT ~~~~
+  server_socket.listen(5)
   print ('Listening to socket')
 except:
   print ('Failed to listen')
