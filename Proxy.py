@@ -114,13 +114,10 @@ while True:
     print ('Cache hit! Loading from cache file: ' + cacheLocation)
     # ProxyServer finds a cache hit
     # Send back response to client 
-    # ~~~~ INSERT CODE ~~~~
-    # ~~~~ END CODE INSERT ~~~~
+
     for line in cacheData:
       clientSocket.sendall(line.encode())
 
-
-      
     cacheFile.close()
     print ('Sent to the client:')
     print ('> ' + cacheData)
@@ -129,8 +126,14 @@ while True:
     originServerSocket = None
     # Create a socket to connect to origin server
     # and store in originServerSocket
-    # ~~~~ INSERT CODE ~~~~
-    # ~~~~ END CODE INSERT ~~~~
+#does not find target form cache
+#creat a socket and send req to server 
+    try:
+        originServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print('Created origin server socket')
+    except:
+        print('Failed to create socket for origin server')
+        sys.exit()
 
     print ('Connecting to:\t\t' + hostname + '\n')
     try:
