@@ -61,7 +61,7 @@ while True:
   # Get HTTP request from client
   # and store it in the variable: message_bytes
 
-  #get message and save
+  #get message form client at most 4096 b
   message_bytes = clientSocket.recv(4096)
   message = message_bytes.decode('utf-8')
   print ('Received request:')
@@ -109,12 +109,18 @@ while True:
     # Check wether the file is currently in the cache
     cacheFile = open(cacheLocation, "r")
     cacheData = cacheFile.readlines()
-
+#check cache and check though all cache,so we can use a for loop to go though
+#if find, send back
     print ('Cache hit! Loading from cache file: ' + cacheLocation)
     # ProxyServer finds a cache hit
     # Send back response to client 
     # ~~~~ INSERT CODE ~~~~
     # ~~~~ END CODE INSERT ~~~~
+    for line in cacheData:
+      clientSocket.sendall(line.encode())
+
+
+      
     cacheFile.close()
     print ('Sent to the client:')
     print ('> ' + cacheData)
