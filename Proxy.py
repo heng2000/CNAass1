@@ -203,3 +203,18 @@ while True:
     clientSocket.close()
   except:
     print ('Failed to close client socket')
+
+
+#       python Proxy.py localhost 8080
+#       curl -iS http://localhost:8080/http://http.badssl.com/
+#       telnet localhost 8080
+#       tasklist | findstr python
+#       taskkill /F /PID 12345
+'''Requested Resource:     /
+Cache location:         ./http.badssl.com/default
+Created origin server socket
+Connecting to:          http.badssl.com
+C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS http://localhost:8080/http://http.badssl.com/
+curl: (52) Empty reply from server
+9.58 19/03/2025 test
+'''
