@@ -140,8 +140,12 @@ while True:
       # Get the IP address for a hostname
       address = socket.gethostbyname(hostname)
       # Connect to the origin server
-      # ~~~~ INSERT CODE ~~~~
-      # ~~~~ END CODE INSERT ~~~~
+      #connect?
+
+
+      originServerSocket.connect((address, 80))
+      
+      
       print ('Connected to origin Server')
 
       originServerRequest = ''
@@ -150,8 +154,10 @@ while True:
       # and store in originServerRequestHeader and originServerRequest
       # originServerRequest is the first line in the request and
       # originServerRequestHeader is the second line in the request
-      # ~~~~ INSERT CODE ~~~~
-      # ~~~~ END CODE INSERT ~~~~
+
+
+      originServerRequest = f"GET {resource} HTTP/1.1"
+      originServerRequestHeader = f"Host: {hostname}\r\nConnection: close"
 
       # Construct the request to send to the origin server
       request = originServerRequest + '\r\n' + originServerRequestHeader + '\r\n\r\n'
@@ -172,6 +178,13 @@ while True:
       # Get the response from the origin server
       # ~~~~ INSERT CODE ~~~~
       # ~~~~ END CODE INSERT ~~~~
+      #reads data from a socket and save in response
+      response = ""
+      while True:
+        data =originServerSocket.recv(BUFFER_SIZE)
+        if not data:
+          break
+        response +=data
 
       # Send the response to the client
       # ~~~~ INSERT CODE ~~~~
@@ -210,11 +223,3 @@ while True:
 #       telnet localhost 8080
 #       tasklist | findstr python
 #       taskkill /F /PID 12345
-'''Requested Resource:     /
-Cache location:         ./http.badssl.com/default
-Created origin server socket
-Connecting to:          http.badssl.com
-C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS http://localhost:8080/http://http.badssl.com/
-curl: (52) Empty reply from server
-9.58 19/03/2025 test
-'''
