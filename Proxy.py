@@ -223,3 +223,9 @@ while True:
 #       telnet localhost 8080
 #       tasklist | findstr python
 #       taskkill /F /PID 12345
+
+
+Traceback (most recent call last):
+  File "C:\Users\lenovo\Desktop\CNA\CNAass1\Proxy.py", line 187, in <module>
+    response +=data
+TypeError: can only concatenate str (not "bytes") to str ,need to change
