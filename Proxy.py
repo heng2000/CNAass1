@@ -179,7 +179,9 @@ while True:
       # ~~~~ INSERT CODE ~~~~
       # ~~~~ END CODE INSERT ~~~~
       #reads data from a socket and save in response
-      response = ""
+      #fix: data is byte string, byt response is string
+      #str and bytes can not conversion
+      response = b""
       while True:
         data =originServerSocket.recv(BUFFER_SIZE)
         if not data:
@@ -220,12 +222,53 @@ while True:
 
 #       python Proxy.py localhost 8080
 #       curl -iS http://localhost:8080/http://http.badssl.com/
+#       curl -iS http://http.badssl.com/
+#       curl -iS http://localhost:8080/http://http.badssl.com/fakefile.html
 #       telnet localhost 8080
 #       tasklist | findstr python
 #       taskkill /F /PID 12345
 
 
-Traceback (most recent call last):
-  File "C:\Users\lenovo\Desktop\CNA\CNAass1\Proxy.py", line 187, in <module>
-    response +=data
-TypeError: can only concatenate str (not "bytes") to str ,need to change
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS http://localhost:8080/http://http.badssl.com/
+curl: (52) Empty reply from server
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS http://http.badssl.com/
+HTTP/1.1 200 OK
+Server: nginx/1.10.3 (Ubuntu)
+Date: Thu, 20 Mar 2025 12:21:11 GMT
+Content-Type: text/html
+Content-Length: 483
+Last-Modified: Tue, 18 Mar 2025 21:00:42 GMT
+Connection: keep-alive
+ETag: "67d9defa-1e3"
+Cache-Control: no-store
+Accept-Ranges: bytes< GET /http://http.badssl.com/ HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/8.10.1
+Accept: */*
+
+
+Method:         GET
+URI:            /http://http.badssl.com/
+Version:        HTTP/1.1
+
+Requested Resource:     /
+Cache location:         ./http.badssl.com/default
+Created origin server socket
+Connecting to:          http.badssl.com
+
+Connected to origin Server
+Forwarding request to origin server:
+> GET / HTTP/1.1
+> Host: http.badssl.com
+> Connection: close
+>
+>
+Request sent to origin server
+
+cached directory ./http.badssl.com
+cache file closed
+origin response received. Closing sockets
+client socket shutdown for writing
+Waiting for connection...
