@@ -189,9 +189,9 @@ while True:
         response +=data
 
       # Send the response to the client
-      # ~~~~ INSERT CODE ~~~~
-      # ~~~~ END CODE INSERT ~~~~
 
+      #send res back
+      clientSocket.sendall(response)
       # Create a new file in the cache for the requested file.
       cacheDir, file = os.path.split(cacheLocation)
       print ('cached directory ' + cacheDir)
@@ -229,21 +229,67 @@ while True:
 #       taskkill /F /PID 12345
 
 
-
 C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS http://localhost:8080/http://http.badssl.com/
-curl: (52) Empty reply from server
-
-C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS http://http.badssl.com/
 HTTP/1.1 200 OK
 Server: nginx/1.10.3 (Ubuntu)
-Date: Thu, 20 Mar 2025 12:21:11 GMT
+Date: Sat, 22 Mar 2025 09:18:24 GMT
 Content-Type: text/html
 Content-Length: 483
 Last-Modified: Tue, 18 Mar 2025 21:00:42 GMT
-Connection: keep-alive
+Connection: close
 ETag: "67d9defa-1e3"
 Cache-Control: no-store
-Accept-Ranges: bytes< GET /http://http.badssl.com/ HTTP/1.1
+Accept-Ranges: bytes
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="/icons/favicon-red.ico"/>
+  <link rel="apple-touch-icon" href="/icons/icon-red.png"/>
+  <title>http.badssl.com</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>body { background: red; }</style>
+</head>
+<body>
+<div id="content">
+  <h1 style="font-size: 8vw;">
+    http.badssl.com
+  </h1>
+</div>
+
+</body>
+</html>
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS http://localhost:8080/http://http.badssl.com/fakefile.html
+HTTP/1.1 404 Not Found
+Server: nginx/1.10.3 (Ubuntu)
+Date: Sat, 22 Mar 2025 09:18:55 GMT
+Content-Type: text/html
+Content-Length: 178
+Connection: close
+
+<html>
+<head><title>404 Not Found</title></head>
+<body bgcolor="white">
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.10.3 (Ubuntu)</center>
+</body>
+</html>
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>
+
+PS C:\Users\lenovo\Desktop\CNA\CNAass1> python Proxy.py localhost 8080
+Created socket
+localhost:8080...
+Port is bound
+Listening to socket
+Waiting for connection...
+Received a connection
+Received a connection from ('127.0.0.1', 63065)
+Received request:
+< GET /http://http.badssl.com/ HTTP/1.1
 Host: localhost:8080
 User-Agent: curl/8.10.1
 Accept: */*
@@ -261,6 +307,38 @@ Connecting to:          http.badssl.com
 Connected to origin Server
 Forwarding request to origin server:
 > GET / HTTP/1.1
+> Host: http.badssl.com
+> Connection: close
+>
+>
+Request sent to origin server
+
+cached directory ./http.badssl.com
+cache file closed
+origin response received. Closing sockets
+client socket shutdown for writing
+Waiting for connection...
+Received a connection
+Received a connection from ('127.0.0.1', 63071)
+Received request:
+< GET /http://http.badssl.com/fakefile.html HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/8.10.1
+Accept: */*
+
+
+Method:         GET
+URI:            /http://http.badssl.com/fakefile.html
+Version:        HTTP/1.1
+
+Requested Resource:     /fakefile.html
+Cache location:         ./http.badssl.com/fakefile.html
+Created origin server socket
+Connecting to:          http.badssl.com
+
+Connected to origin Server
+Forwarding request to origin server:
+> GET /fakefile.html HTTP/1.1
 > Host: http.badssl.com
 > Connection: close
 >
