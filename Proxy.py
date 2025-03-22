@@ -176,8 +176,7 @@ while True:
       print('Request sent to origin server\n')
 
       # Get the response from the origin server
-      # ~~~~ INSERT CODE ~~~~
-      # ~~~~ END CODE INSERT ~~~~
+
       #reads data from a socket and save in response
       #fix: data is byte string, byt response is string
       #str and bytes can not conversion
@@ -202,6 +201,8 @@ while True:
       # Save origin server response in the cache file
       # ~~~~ INSERT CODE ~~~~
       # ~~~~ END CODE INSERT ~~~~
+      #??
+      cacheFile.write(response)
       cacheFile.close()
       print ('cache file closed')
 
@@ -224,62 +225,14 @@ while True:
 #       curl -iS http://localhost:8080/http://http.badssl.com/
 #       curl -iS http://http.badssl.com/
 #       curl -iS http://localhost:8080/http://http.badssl.com/fakefile.html
+#       curl -iS "http://localhost:8080/http://httpbin.org/redirect-to?url=http://http.badssl.com&status_code=301"
+#       curl -iS "http://localhost:8080/http://httpbin.org/redirect-to?url=http://http.badssl.com&status_code=302"
+#       curl -iS "http://localhost:8080/http://httpbin.org/cache/0" 
 #       telnet localhost 8080
 #       tasklist | findstr python
 #       taskkill /F /PID 12345
 
-
-C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS http://localhost:8080/http://http.badssl.com/
-HTTP/1.1 200 OK
-Server: nginx/1.10.3 (Ubuntu)
-Date: Sat, 22 Mar 2025 09:18:24 GMT
-Content-Type: text/html
-Content-Length: 483
-Last-Modified: Tue, 18 Mar 2025 21:00:42 GMT
-Connection: close
-ETag: "67d9defa-1e3"
-Cache-Control: no-store
-Accept-Ranges: bytes
-
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="shortcut icon" href="/icons/favicon-red.ico"/>
-  <link rel="apple-touch-icon" href="/icons/icon-red.png"/>
-  <title>http.badssl.com</title>
-  <link rel="stylesheet" href="/style.css">
-  <style>body { background: red; }</style>
-</head>
-<body>
-<div id="content">
-  <h1 style="font-size: 8vw;">
-    http.badssl.com
-  </h1>
-</div>
-
-</body>
-</html>
-
-C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS http://localhost:8080/http://http.badssl.com/fakefile.html
-HTTP/1.1 404 Not Found
-Server: nginx/1.10.3 (Ubuntu)
-Date: Sat, 22 Mar 2025 09:18:55 GMT
-Content-Type: text/html
-Content-Length: 178
-Connection: close
-
-<html>
-<head><title>404 Not Found</title></head>
-<body bgcolor="white">
-<center><h1>404 Not Found</h1></center>
-<hr><center>nginx/1.10.3 (Ubuntu)</center>
-</body>
-</html>
-
-C:\Users\lenovo\Desktop\CNA\CNAass1>
-
+recording 
 PS C:\Users\lenovo\Desktop\CNA\CNAass1> python Proxy.py localhost 8080
 Created socket
 localhost:8080...
@@ -287,7 +240,7 @@ Port is bound
 Listening to socket
 Waiting for connection...
 Received a connection
-Received a connection from ('127.0.0.1', 63065)
+Received a connection from ('127.0.0.1', 63387)
 Received request:
 < GET /http://http.badssl.com/ HTTP/1.1
 Host: localhost:8080
@@ -319,7 +272,7 @@ origin response received. Closing sockets
 client socket shutdown for writing
 Waiting for connection...
 Received a connection
-Received a connection from ('127.0.0.1', 63071)
+Received a connection from ('127.0.0.1', 63399)
 Received request:
 < GET /http://http.badssl.com/fakefile.html HTTP/1.1
 Host: localhost:8080
@@ -350,3 +303,225 @@ cache file closed
 origin response received. Closing sockets
 client socket shutdown for writing
 Waiting for connection...
+Received a connection
+Received a connection from ('127.0.0.1', 63405)
+Received request:
+< GET /http://httpbin.org/redirect-to?url=http://http.badssl.com&status_code=301 HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/8.10.1
+Accept: */*
+
+
+Method:         GET
+URI:            /http://httpbin.org/redirect-to?url=http://http.badssl.com&status_code=301
+Version:        HTTP/1.1
+
+Requested Resource:     /redirect-to?url=http://http.badssl.com&status_code=301
+Cache location:         ./httpbin.org/redirect-to?url=http://http.badssl.com&status_code=301
+Created origin server socket
+Connecting to:          httpbin.org
+
+Connected to origin Server
+Forwarding request to origin server:
+> GET /redirect-to?url=http://http.badssl.com&status_code=301 HTTP/1.1
+> Host: httpbin.org
+> Connection: close
+>
+>
+Request sent to origin server
+
+cached directory ./httpbin.org/redirect-to?url=http:
+origin server request failed. 文件名、目录名或卷标语法不正确。
+Waiting for connection...
+Received a connection
+Received a connection from ('127.0.0.1', 63417)
+Received request:
+< GET /http://httpbin.org/redirect-to?url=http://http.badssl.com&status_code=302 HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/8.10.1
+Accept: */*
+
+
+Method:         GET
+URI:            /http://httpbin.org/redirect-to?url=http://http.badssl.com&status_code=302
+Version:        HTTP/1.1
+
+Requested Resource:     /redirect-to?url=http://http.badssl.com&status_code=302
+Cache location:         ./httpbin.org/redirect-to?url=http://http.badssl.com&status_code=302
+Created origin server socket
+Connecting to:          httpbin.org
+
+Connected to origin Server
+Forwarding request to origin server:
+> GET /redirect-to?url=http://http.badssl.com&status_code=302 HTTP/1.1
+> Host: httpbin.org
+> Connection: close
+>
+>
+Request sent to origin server
+
+cached directory ./httpbin.org/redirect-to?url=http:
+origin server request failed. 文件名、目录名或卷标语法不正确。
+Waiting for connection...
+Received a connection
+Received a connection from ('127.0.0.1', 63434)
+Received request:
+< GET /http://httpbin.org/cache/0 HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/8.10.1
+Accept: */*
+
+
+Method:         GET
+URI:            /http://httpbin.org/cache/0
+Version:        HTTP/1.1
+
+Requested Resource:     /cache/0
+Cache location:         ./httpbin.org/cache/0
+Created origin server socket
+Connecting to:          httpbin.org
+
+Connected to origin Server
+Forwarding request to origin server:
+> GET /cache/0 HTTP/1.1
+> Host: httpbin.org
+> Connection: close
+>
+>
+Request sent to origin server
+
+cached directory ./httpbin.org/cache
+cache file closed
+origin response received. Closing sockets
+client socket shutdown for writing
+Waiting for connection...
+
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS http://localhost:8080/http://http.badssl.com/
+HTTP/1.1 200 OK
+Server: nginx/1.10.3 (Ubuntu)
+Date: Sat, 22 Mar 2025 09:41:51 GMT
+Content-Type: text/html
+Content-Length: 483
+Last-Modified: Tue, 18 Mar 2025 21:00:42 GMT
+Connection: close
+ETag: "67d9defa-1e3"
+Cache-Control: no-store
+Accept-Ranges: bytes
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="/icons/favicon-red.ico"/>
+  <link rel="apple-touch-icon" href="/icons/icon-red.png"/>
+  <title>http.badssl.com</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>body { background: red; }</style>
+</head>
+<body>
+<div id="content">
+  <h1 style="font-size: 8vw;">
+    http.badssl.com
+  </h1>
+</div>
+
+</body>
+</html>
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS http://http.badssl.com/
+HTTP/1.1 200 OK
+Server: nginx/1.10.3 (Ubuntu)
+Date: Sat, 22 Mar 2025 09:42:06 GMT
+Content-Type: text/html
+Content-Length: 483
+Last-Modified: Tue, 18 Mar 2025 21:00:42 GMT
+Connection: keep-alive
+ETag: "67d9defa-1e3"
+Cache-Control: no-store
+Accept-Ranges: bytes
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="/icons/favicon-red.ico"/>
+  <link rel="apple-touch-icon" href="/icons/icon-red.png"/>
+  <title>http.badssl.com</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>body { background: red; }</style>
+</head>
+<body>
+<div id="content">
+  <h1 style="font-size: 8vw;">
+    http.badssl.com
+  </h1>
+</div>
+
+</body>
+</html>
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS http://localhost:8080/http://http.badssl.com/fakefile.html
+HTTP/1.1 404 Not Found
+Server: nginx/1.10.3 (Ubuntu)
+Date: Sat, 22 Mar 2025 09:42:19 GMT
+Content-Type: text/html
+Content-Length: 178
+Connection: close
+
+<html>
+<head><title>404 Not Found</title></head>
+<body bgcolor="white">
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.10.3 (Ubuntu)</center>
+</body>
+</html>
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS "http://localhost:8080/http://httpbin.org/redirect-to?url=http://http.badssl.com&status_code=301"
+HTTP/1.1 301 MOVED PERMANENTLY
+Date: Sat, 22 Mar 2025 09:42:38 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 0
+Connection: close
+Server: gunicorn/19.9.0
+Location: http://http.badssl.com
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS "http://localhost:8080/http://httpbin.org/redirect-to?url=http://http.badssl.com&status_code=302"
+HTTP/1.1 302 FOUND
+Date: Sat, 22 Mar 2025 09:43:08 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 0
+Connection: close
+Server: gunicorn/19.9.0
+Location: http://http.badssl.com
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS "http://localhost:8080/http://httpbin.org/cache/0"
+HTTP/1.1 200 OK
+Date: Sat, 22 Mar 2025 09:43:41 GMT
+Content-Type: application/json
+Content-Length: 201
+Connection: close
+Server: gunicorn/19.9.0
+Cache-Control: public, max-age=0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+{
+  "args": {},
+  "headers": {
+    "Host": "httpbin.org",
+    "X-Amzn-Trace-Id": "Root=1-67de864d-15ac9cad3d2f06c9092a3d62"
+  },
+  "origin": "210.5.32.226",
+  "url": "http://httpbin.org/cache/0"
+}
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>
