@@ -5,7 +5,8 @@ import os
 import argparse
 import re
 #python Proxy.py localhost 8080
-
+#next step: handles url redirection 301 302
+#handles cache-control
 # 1MB buffer size
 BUFFER_SIZE = 1000000
 
