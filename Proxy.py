@@ -195,22 +195,21 @@ while True:
       #headers do not complete
       if header_end != -1:
           #get headers from the response
+          #change to string
           header_text = response[:header_end].decode()
           #split headers into individual lines
           #first line
-          status_line = header_text.splitlines()[1]
+          #it should be 0 rather than 1
+          status_line = header_text.splitlines()[0]
           #varify 301/302
           if "301" in status_line or "302" in status_line:
-              print("redirect:")
+              print("Redirect:")
+              #go though each line of the header
               for line in header_text.splitlines():
-                  if line.startswith("location:"):
-                      location_url = line.split(":")
+                  if line.startswith("Location:"):
+                      #splits the line into two parts location and url
+                      location_url = line.split(":",1)
                       print(f"redirect to: {location_url}")
-
-
-
-
-
 
       # Send the response to the client
 
@@ -244,6 +243,50 @@ while True:
     clientSocket.close()
   except:
     print ('Failed to close client socket')
+
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS "http://localhost:8080/http://httpbin.org/redirect-to?url=http://http.badssl.com&status_code=301"
+HTTP/1.1 301 MOVED PERMANENTLY
+Date: Tue, 25 Mar 2025 07:58:58 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 0
+Connection: close
+Server: gunicorn/19.9.0
+Location: http://http.badssl.com
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS "http://httpbin.org/redirect-to?url=http://http.badssl.com&status_code=301"
+                                                                                                                       HTTP/1.1 301 MOVED PERMANENTLY
+Date: Tue, 25 Mar 2025 07:59:23 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 0
+Connection: keep-alive
+Server: gunicorn/19.9.0
+Location: http://http.badssl.com
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>
+
+
+PS C:\Users\lenovo\Desktop\CNA\CNAass1> python Proxy.py localhost 8080
+Created socket
+localhost:8080...
+Port is bound
+Listening to socket
+Waiting for connection...
+Received a connection
+Received a connection from ('127.0.0.1', 51305)
+Received request:
+< GET /http://httpbin.org/redirect-to?url=http://http.badssl.com&status_code=301 HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/8.10.1
+Accept: */*
+
+
 Method:         GET
 URI:            /http://httpbin.org/redirect-to?url=http://http.badssl.com&status_code=301
 Version:        HTTP/1.1
@@ -262,18 +305,8 @@ Forwarding request to origin server:
 >
 Request sent to origin server
 
-redirect:
+Redirect:
+redirect to: ['Location', ' http://http.badssl.com']
 cached directory ./httpbin.org/redirect-to?url=http:
 origin server request failed. 文件名、目录名或卷标语法不正确。
 Waiting for connection...
-C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS "http://localhost:8080/http://httpbin.org/redirect-to?url=http://http.badssl.com&status_code=301"
-HTTP/1.1 301 MOVED PERMANENTLY
-Date: Tue, 25 Mar 2025 07:46:06 GMT
-Content-Type: text/html; charset=utf-8
-Content-Length: 0
-Connection: close
-Server: gunicorn/19.9.0
-Location: http://http.badssl.com
-Access-Control-Allow-Origin: *
-Access-Control-Allow-Credentials: true
-
