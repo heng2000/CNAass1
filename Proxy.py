@@ -4,7 +4,8 @@ import sys
 import os
 import argparse
 import re
-#python Proxy.py localhost 8080
+#python Proxy.py localhost 8080 tasklist | findstr python taskkill /F /PID 12345
+
 #next step: handles url redirection 301 302
 #handles cache-control
 # 1MB buffer size
@@ -187,6 +188,29 @@ while True:
         if not data:
           break
         response +=data
+        #check redirection
+        #check end of the headers
+        #returns the index
+      header_end = response.find(b'\r\n\r\n')
+      #headers do not complete
+      if header_end != -1:
+          #get headers from the response
+          header_text = response[:header_end].decode()
+          #split headers into individual lines
+          #first line
+          status_line = header_text.splitlines()[1]
+          #varify 301/302
+          if "301" in status_line or "302" in status_line:
+              print("redirect:")
+              for line in header_text.splitlines():
+                  if line.startswith("location:"):
+                      location_url = line.split(":")
+                      print(f"redirect to: {location_url}")
+
+
+
+
+
 
       # Send the response to the client
 
@@ -220,3 +244,36 @@ while True:
     clientSocket.close()
   except:
     print ('Failed to close client socket')
+Method:         GET
+URI:            /http://httpbin.org/redirect-to?url=http://http.badssl.com&status_code=301
+Version:        HTTP/1.1
+
+Requested Resource:     /redirect-to?url=http://http.badssl.com&status_code=301
+Cache location:         ./httpbin.org/redirect-to?url=http://http.badssl.com&status_code=301
+Created origin server socket
+Connecting to:          httpbin.org
+
+Connected to origin Server
+Forwarding request to origin server:
+> GET /redirect-to?url=http://http.badssl.com&status_code=301 HTTP/1.1
+> Host: httpbin.org
+> Connection: close
+>
+>
+Request sent to origin server
+
+redirect:
+cached directory ./httpbin.org/redirect-to?url=http:
+origin server request failed. 文件名、目录名或卷标语法不正确。
+Waiting for connection...
+C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS "http://localhost:8080/http://httpbin.org/redirect-to?url=http://http.badssl.com&status_code=301"
+HTTP/1.1 301 MOVED PERMANENTLY
+Date: Tue, 25 Mar 2025 07:46:06 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 0
+Connection: close
+Server: gunicorn/19.9.0
+Location: http://http.badssl.com
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
