@@ -2,7 +2,7 @@
 Author: yuheng li a1793138
 Date: 2025-03-22 20:30:02
 LastEditors: yuheng 
-LastEditTime: 2025-03-25 20:03:18
+LastEditTime: 2025-03-25 20:05:48
 FilePath: \CNAass1\Proxy-bonus.py
 Description: 
 
@@ -46,12 +46,11 @@ def fetch_and_cache_from_origin(webserver, port,filename):
         print("error message:", e)
 
 def main():
-    webserver = "http://localhost:8080/http://httpbin.org/redirect-to?url=http://http.badssl.com&status_code=301"
+    webserver = "http://localhost:8080/http://httpbin.org/cache/0"
     port =8080
     filename ="test1.txt"
     try:
         fetch_and_cache_from_origin(webserver,port,filename)
-
     except Exception as e:
             print("error : ", e)
 
