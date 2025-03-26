@@ -4,6 +4,7 @@ import sys
 import os
 import argparse
 import re
+import time
 #python Proxy.py localhost 8080 tasklist | findstr python taskkill /F /PID 12345
 
 #next step: handles url redirection 301 302
@@ -111,6 +112,24 @@ while True:
     # Check wether the file is currently in the cache
     cacheFile = open(cacheLocation, "r")
     cacheData = cacheFile.readlines()
+    #update whether cache is overdate
+    #metaPath path for save mate file
+    metaPath = cacheLocation + ".meta"
+    #check whether metaPath is exist
+    if os.path.exists(metaPath):
+        #read
+        with open(metaPath, "r") as meta:
+            #find expireTime currentTime
+            expireTime = int(meta.read())
+            currentTime = int(time.time())
+            #overdate
+            if currentTime > expireTime:
+                print(f"cache expired (expired at {expireTime},now {currentTime})")
+                raise Exception("it is expired")
+            else:
+                print(f"cache still valid (expires at {expireTime},now {currentTime})")
+
+
 #check cache and check though all cache,so we can use a for loop to go though
 #if find, send back
     print ('Cache hit! Loading from cache file: ' + cacheLocation)
@@ -191,12 +210,12 @@ while True:
         #check redirection
         #check end of the headers
         #returns the index
-      header_end = response.find(b'\r\n\r\n')
+      headerEnd = response.find(b'\r\n\r\n')
       #headers do not complete
-      if header_end != -1:
+      if headerEnd != -1:
           #get headers from the response
           #change to string
-          header_text = response[:header_end].decode()
+          header_text = response[:headerEnd].decode()
           #split headers into individual lines
           #first line
           #it should be 0 rather than 1
@@ -229,6 +248,32 @@ while True:
       cacheFile.write(response)
       cacheFile.close()
       print ('cache file closed')
+      #cacheTime save overdate time
+      cacheTime=0
+      #check end of the HTTP headers headerEnd
+      headerEnd = response.find(b'\r\n\r\n')
+      #FIND
+      if headerEnd!= -1:
+          #headerContent
+          #response type is a byte and onlu get header part
+          #change to string
+          headerContent =response[:headerEnd].decode()
+          #search for headers
+          for line in headerContent.splitlines():
+              #change to lowercase
+              #if "Cache-Control" in line and "max-age" in line
+              if "cache-control" in line.lower() and "max-age" in line.lower():
+                  #used to find matched part a/more number and get hte number
+                  #match = re.search(r'max-age=', line)
+                  match = re.search(r'max-age=(\d+)')
+                  if match:
+                      #get the number last step
+                      cacheTime = int(match.group(1))
+                      print(f"Cache-Control: the  max-age = {cacheTime} seconds")
+                      expires_at = int(time.time()) + cacheTime
+                      with open(cacheLocation + ".meta", "w") as metafile:
+                          metafile.write(str(expires_at))
+                          print(f"Cache-Control: cache will expire at {expires_at}")
 
       # finished communicating with origin server - shutdown socket writes
       print ('origin response received. Closing sockets')
@@ -243,3 +288,53 @@ while True:
     clientSocket.close()
   except:
     print ('Failed to close client socket')
+
+    '''PS C:\Users\lenovo\Desktop\CNA\CNAass1> python Proxy.py localhost 8080
+Created socket
+localhost:8080...
+Port is bound
+Listening to socket
+Waiting for connection...
+Received a connection
+Received a connection from ('127.0.0.1', 55957)
+Received request:
+< GET /http://httpbin.org/cache/0 HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/8.10.1
+Accept: */*
+
+
+Method:         GET
+URI:            /http://httpbin.org/cache/0
+Version:        HTTP/1.1
+
+Requested Resource:     /cache/0
+Cache location:         ./httpbin.org/cache/0
+cache expired (expired at 1742973996,now 1742974714)
+Created origin server socket
+Connecting to:          httpbin.org
+
+Connected to origin Server
+Forwarding request to origin server:
+> GET /cache/0 HTTP/1.1
+> Host: httpbin.org
+> Connection: close
+>
+>
+Request sent to origin server
+
+cached directory ./httpbin.org/cache
+cache file closed
+Traceback (most recent call last):
+  File "C:\Users\lenovo\Desktop\CNA\CNAass1\Proxy.py", line 128, in <module>
+    raise Exception("it is expired")
+Exception: it is expired
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\lenovo\Desktop\CNA\CNAass1\Proxy.py", line 268, in <module>
+    match = re.search(r'max-age=(\d+)')
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: search() missing 1 required positional argument: 'string'
+PS C:\Users\lenovo\Desktop\CNA\CNAass1>'''
