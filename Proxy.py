@@ -265,15 +265,15 @@ while True:
               if "cache-control" in line.lower() and "max-age" in line.lower():
                   #used to find matched part a/more number and get hte number
                   #match = re.search(r'max-age=', line)
-                  match = re.search(r'max-age=(\d+)')
+                  match = re.search(r'max-age=(\d+)',line)
                   if match:
                       #get the number last step
                       cacheTime = int(match.group(1))
                       print(f"Cache-Control: the  max-age = {cacheTime} seconds")
-                      expires_at = int(time.time()) + cacheTime
+                      expireTime = int(time.time()) + cacheTime # cacheTime #int(time.time()) + cacheTime
                       with open(cacheLocation + ".meta", "w") as metafile:
-                          metafile.write(str(expires_at))
-                          print(f"Cache-Control: cache will expire at {expires_at}")
+                          metafile.write(str(expireTime))
+                          print(f"Cache-Control: cache will expire at {expireTime}")
 
       # finished communicating with origin server - shutdown socket writes
       print ('origin response received. Closing sockets')
@@ -289,34 +289,35 @@ while True:
   except:
     print ('Failed to close client socket')
 
-    '''PS C:\Users\lenovo\Desktop\CNA\CNAass1> python Proxy.py localhost 8080
+
+    PS C:\Users\lenovo\Desktop\CNA\CNAass1> python Proxy.py localhost 8080
 Created socket
 localhost:8080...
 Port is bound
 Listening to socket
 Waiting for connection...
 Received a connection
-Received a connection from ('127.0.0.1', 55957)
+Received a connection from ('127.0.0.1', 56097)
 Received request:
-< GET /http://httpbin.org/cache/0 HTTP/1.1
+< GET /http://httpbin.org/cache/1 HTTP/1.1
 Host: localhost:8080
 User-Agent: curl/8.10.1
 Accept: */*
 
 
 Method:         GET
-URI:            /http://httpbin.org/cache/0
+URI:            /http://httpbin.org/cache/1
 Version:        HTTP/1.1
 
-Requested Resource:     /cache/0
-Cache location:         ./httpbin.org/cache/0
-cache expired (expired at 1742973996,now 1742974714)
+Requested Resource:     /cache/1
+Cache location:         ./httpbin.org/cache/1
+cache expired (expired at 1,now 1742975517)
 Created origin server socket
 Connecting to:          httpbin.org
 
 Connected to origin Server
 Forwarding request to origin server:
-> GET /cache/0 HTTP/1.1
+> GET /cache/1 HTTP/1.1
 > Host: httpbin.org
 > Connection: close
 >
@@ -325,16 +326,70 @@ Request sent to origin server
 
 cached directory ./httpbin.org/cache
 cache file closed
-Traceback (most recent call last):
-  File "C:\Users\lenovo\Desktop\CNA\CNAass1\Proxy.py", line 128, in <module>
-    raise Exception("it is expired")
-Exception: it is expired
+Cache-Control: the  max-age = 1 seconds
+Cache-Control: cache will expire at 1742975519
+origin response received. Closing sockets
+client socket shutdown for writing
+Waiting for connection...
+Received a connection
+Received a connection from ('127.0.0.1', 56100)
+Received request:
+< GET /http://httpbin.org/cache/1 HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/8.10.1
+Accept: */*
 
-During handling of the above exception, another exception occurred:
 
-Traceback (most recent call last):
-  File "C:\Users\lenovo\Desktop\CNA\CNAass1\Proxy.py", line 268, in <module>
-    match = re.search(r'max-age=(\d+)')
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-TypeError: search() missing 1 required positional argument: 'string'
-PS C:\Users\lenovo\Desktop\CNA\CNAass1>'''
+Method:         GET
+URI:            /http://httpbin.org/cache/1
+Version:        HTTP/1.1
+
+Requested Resource:     /cache/1
+Cache location:         ./httpbin.org/cache/1
+cache expired (expired at 1742975519,now 1742975535)
+Created origin server socket
+Connecting to:          httpbin.org
+
+Connected to origin Server
+Forwarding request to origin server:
+> GET /cache/1 HTTP/1.1
+> Host: httpbin.org
+> Connection: close
+>
+>
+Request sent to origin server
+
+cached directory ./httpbin.org/cache
+cache file closed
+Cache-Control: the  max-age = 1 seconds
+Cache-Control: cache will expire at 1742975536
+origin response received. Closing sockets
+client socket shutdown for writing
+Waiting for connection...
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS "http://localhost:8080/http://httpbin.org/cache/1"
+HTTP/1.1 200 OK
+Date: Wed, 26 Mar 2025 07:52:12 GMT
+Content-Type: application/json
+Content-Length: 201
+Connection: close
+Server: gunicorn/19.9.0
+Cache-Control: public, max-age=1
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+{
+  "args": {},
+  "headers": {
+    "Host": "httpbin.org",
+    "X-Amzn-Trace-Id": "Root=1-67e3b22c-6c07133a48c0ec297bdcdfd8"
+  },
+  "origin": "210.5.32.224",
+  "url": "http://httpbin.org/cache/1"
+}
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>tasklist | findstr python
+python3.12.exe               12688 Console                    1     27,572 K
+
+C:\Users\lenovo\Desktop\CNA\CNAass1>taskkill /F /PID 12688
+成功: 已终止 PID 为 12688 的进程。
