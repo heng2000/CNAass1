@@ -1,6 +1,7 @@
 import re
 import os
 from email.utils import parsedate_to_datetime
+import socket
 def getCachefromPath(URI):
     URI = re.sub('^(/?)http(s?)://', '', URI, count=1)
     URI = URI.replace('/..', '')
@@ -49,23 +50,122 @@ def saveHeader(cachePath, responseContent, responsHeader):
         for header in responsHeader:
             f.write(header + "\n")
 
-if __name__ == "__main__":
+
+#get client socket and url
+def getRequest(cS, url):
+    cachePath = getCachefromPath(url)
+    #check whether cache is exist
+    if os.path.exists(cachePath) and not checkExpired(cachePath):
+        with open(cachePath, 'rb') as f:
+            cS.sendall(f.read())
+        print("from cache")
+        return
+    #cache does not exist or overdate
+    print("from origin server")
+
+    URI = re.sub('^(/?)http(s?)://', '', url, count=1)
+    # Remove parent directory changes - security
+    URI = URI.replace('/..', '')
+    resourceParts = URI.split('/', 1)
+    hostname = resourceParts[0]
+    resource = '/' + resourceParts[1] if len(resourceParts) == 2 else '/'
+    #connection with originServerSocket
+    try:
+        originServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        originServerSocket.connect((hostname, 80))
+        print(f"connect to {hostname}:80")
+    except Exception as e:
+        print(f"connect failed: {e}")
+        return
+    originServerRequest = f"GET {resource} HTTP/1.1"
+    originServerRequestHeader = f"Host: {hostname}\r\nConnection: close"
+    request = originServerRequest + '\r\n' + originServerRequestHeader + '\r\n\r\n'
+    try:
+        originServerSocket.sendall(request.encode())
+
+    except originServerSocket.error:
+        print ('Forward request to origin failed')
+
+        sys.exit()
+
+    print('Request sent to origin server\n')
+
+    #reveive response
+    response = b""
+    while True:
+        data = originServerSocket.recv(4096)
+        if not data:
+            break
+        response += data
+    originServerSocket.close()
+    #send to client
+    cS.sendall(response)
+
+    headerEnd  = response.find(b"\r\n\r\n")
+    if headerEnd  != -1:
+        splitHeader = response[:headerEnd ].decode().split("\r\n")
+        body = response[headerEnd  + 4:]
+        saveHeader(cachePath , body,splitHeader)
+        #finish to write
+    cS.shutdown(socket.SHUT_WR)
+
+
+
+def main():
+
+    client1, server1 = socket.socketpair()
+
     url = "http://httpbin.org/cache/60"
-    print("Cache path:", getCachefromPath(url))
-    Cachepath = getCachefromPath(url)
-    responseContent = b"<html><body><h1>Hello, World!</h1></body></html>"
-    responseHeader = [
-        "GET /http://httpbin.org/cache/60 HTTP/1.1"
-        "Host: localhost:8080"
-        "User-Agent: curl/8.10.1"
-        "Accept: */*"
-        "Expires: Wed, 01 Apr 2025 12:00:00 GMT"
-    ]
-    saveHeader(Cachepath , responseContent, responseHeader)
-    result =checkExpired(getCachefromPath(url))
-    print(result)
+
+    print("call getRequest")
+    getRequest(server1, url)
+
+    print("received data from getRequest()")
+    response = b""
+    try:
+        while True:
+            chunk = client1.recv(4096)
+            if not chunk:
+                break
+            response += chunk
+    except:
+        pass
+
+    print("receive")
+    print(response.decode())
+
+    client1.close()
+    server1.close()
+
+if __name__ == "__main__":
+    main()
 
     PS C:\Users\lenovo\Desktop\CNA\CNAass1> python Proxy-bonus.py
-Cache path: ./httpbin.org/cache/60
-True
+call getRequest
+from origin server
+connect to httpbin.org:80
+Request sent to origin server
+
+received data from getRequest()
+receive
+HTTP/1.1 200 OK
+Date: Thu, 27 Mar 2025 10:37:44 GMT
+Content-Type: application/json
+Content-Length: 202
+Connection: close
+Server: gunicorn/19.9.0
+Cache-Control: public, max-age=60
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+{
+  "args": {},
+  "headers": {
+    "Host": "httpbin.org",
+    "X-Amzn-Trace-Id": "Root=1-67e52a77-52ff64c64add8fa86fd765fd"
+  },
+  "origin": "210.5.32.225",
+  "url": "http://httpbin.org/cache/60"
+}
+
 PS C:\Users\lenovo\Desktop\CNA\CNAass1>
