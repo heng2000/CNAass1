@@ -2,6 +2,7 @@ import re
 import os
 from email.utils import parsedate_to_datetime
 import socket
+import sys
 def getCachefromPath(URI):
     URI = re.sub('^(/?)http(s?)://', '', URI, count=1)
     URI = URI.replace('/..', '')
@@ -111,31 +112,27 @@ def getRequest(cS, url):
 
 
 
-def main():
-
-    client1, server1 = socket.socketpair()
-
-    url = "http://httpbin.org/cache/60"
-
-    print("call getRequest")
-    getRequest(server1, url)
-
-    print("received data from getRequest()")
-    response = b""
-    try:
-        while True:
-            chunk = client1.recv(4096)
-            if not chunk:
-                break
-            response += chunk
-    except:
-        pass
-
-    print("receive")
-    print(response.decode())
-
-    client1.close()
-    server1.close()
-
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) <= 2:
+        print("do not have enough vars")
+        print("python Proxy-bonus.py <server_ip> <server_port>")
+        sys.exit(1)
+
+    host = sys.argv[1]
+    port = int(sys.argv[2])
+
+    serverConnection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    serverConnection.bind((host, port))
+    serverConnection.listen(5)
+    print(f"Proxy running on {host}:{port}")
+
+    while True:
+        client_socket, addr = serverConnection.accept()
+        try:
+            request_data = client_socket.recv(4096).decode()
+            first_line = request_data.split('\n')[0]
+            url = first_line.split(' ')[1]
+            getRequest(client_socket, url)
+        except Exception as e:
+            print("ero check error message", e)
+        client_socket.close()
