@@ -139,33 +139,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-    PS C:\Users\lenovo\Desktop\CNA\CNAass1> python Proxy-bonus.py
-call getRequest
-from origin server
-connect to httpbin.org:80
-Request sent to origin server
-
-received data from getRequest()
-receive
-HTTP/1.1 200 OK
-Date: Thu, 27 Mar 2025 10:37:44 GMT
-Content-Type: application/json
-Content-Length: 202
-Connection: close
-Server: gunicorn/19.9.0
-Cache-Control: public, max-age=60
-Access-Control-Allow-Origin: *
-Access-Control-Allow-Credentials: true
-
-{
-  "args": {},
-  "headers": {
-    "Host": "httpbin.org",
-    "X-Amzn-Trace-Id": "Root=1-67e52a77-52ff64c64add8fa86fd765fd"
-  },
-  "origin": "210.5.32.225",
-  "url": "http://httpbin.org/cache/60"
-}
-
-PS C:\Users\lenovo\Desktop\CNA\CNAass1>
