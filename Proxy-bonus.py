@@ -1,58 +1,71 @@
-'''
-Author: yuheng li a1793138
-Date: 2025-03-22 20:30:02
-LastEditors: yuheng 
-LastEditTime: 2025-03-25 20:05:48
-FilePath: \CNAass1\Proxy-bonus.py
-Description: 
+import re
+import os
+from email.utils import parsedate_to_datetime
+def getCachefromPath(URI):
+    URI = re.sub('^(/?)http(s?)://', '', URI, count=1)
+    URI = URI.replace('/..', '')
+    parts = URI.split('/', 1)
+    hostname = parts[0]
+    resource = '/'
+    if len(parts) == 2:
+        resource += parts[1]
+    cacheLocation = './' + hostname + resource
+    if cacheLocation.endswith('/'):
+        cacheLocation += 'default'
+    dirPath = os.path.dirname(cacheLocation)
+    if not os.path.exists(dirPath):
+        os.makedirs(dirPath)
+    return cacheLocation
 
-Copyright (c) ${2024} by ${yuheng li}, All Rights Reserved. 
-'''
-#if exist .expires file at ht same time the expires does not overdate
-#return from cache
-#else try to re-get resource form server-update cache and .expires ifle
-#the question is how to get the timestamp of .expires
+def checkExpired(cachePath):
+    headerPath = cachePath +"header"
+    #print(headerPath)
+    #do not exit means overdate
+    if not os.path.exists(headerPath):
+        return True
+#read only
+    with open(headerPath, 'r') as f:
+        for line in f:
+            #if find expires
+            if line.lower().startswith("expires:"):
+                try:
+                    #split as 2 parts the second is date string strip() to remove sapve and
+                    #parsedate_to_datetime change to datetime type
+                    expireTime = parsedate_to_datetime(line.split(":", 1)[1].strip())
+                    now = int(time.time())
+                    return now >= expireTime
+                except:
+                    return True
+    return True
 
-#save to resource
-'''
-curl -iS http://localhost:8080/http://httpbin.org/cache/0
-curl -iS http://localhost:8080/http://httpbin.org/cache/3600
-'''
 
-#server ip
-#port and path of file
-def fetch_and_cache_from_origin(webserver, port,filename):
-    try:
-        #inter net address for IPv4
-        #socket type for TCP transport messages in the network
-        #want to communicate with server
-        origin_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        origin_socket.connect((webserver, port))
-        response = b""
-        request_header = response.find(b'\r\n\r\n')
-        header_text = response[:request_header].decode()
-        full_request = header_text + request_header
-        #send all req
-        origin_socket.sendall(full_request)
-        #empty string
-        response_text =""
-        response_text = origin_socket.recv(4096)
-        #save
-        with open(filename, 'wb') as cache_file:
-            cache_file.write(response_text)
-        origin_socket.close()
-
-    except Exception as e:
-        print("error message:", e)
-
-def main():
-    webserver = "http://localhost:8080/http://httpbin.org/cache/0"
-    port =8080
-    filename ="test1.txt"
-    try:
-        fetch_and_cache_from_origin(webserver,port,filename)
-    except Exception as e:
-            print("error : ", e)
+def saveHeader(cachePath, responseContent, responsHeader):
+    #GET THE CACHE PATH ADN wirte in the file content
+    with open(cachePath, 'wb') as f:
+        f.write(responseContent)
+    #file header 
+    headerPath = cachePath +"header"
+    with open(headerPath, 'w') as f:
+        for header in responsHeader:
+            f.write(header + "\n")
 
 if __name__ == "__main__":
-    main()
+    url = "http://httpbin.org/cache/60"
+    print("Cache path:", getCachefromPath(url))
+    Cachepath = getCachefromPath(url)
+    responseContent = b"<html><body><h1>Hello, World!</h1></body></html>"
+    responseHeader = [
+        "GET /http://httpbin.org/cache/60 HTTP/1.1"
+        "Host: localhost:8080"
+        "User-Agent: curl/8.10.1"
+        "Accept: */*"
+        "Expires: Wed, 01 Apr 2025 12:00:00 GMT"
+    ]
+    saveHeader(Cachepath , responseContent, responseHeader)
+    result =checkExpired(getCachefromPath(url))
+    print(result)
+
+    PS C:\Users\lenovo\Desktop\CNA\CNAass1> python Proxy-bonus.py
+Cache path: ./httpbin.org/cache/60
+True
+PS C:\Users\lenovo\Desktop\CNA\CNAass1>
