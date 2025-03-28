@@ -4,6 +4,7 @@ from email.utils import parsedate_to_datetime
 import socket
 import sys
 import datetime
+from datetime import datetime, timezone
 def getCachefromPath(URI):
     URI = re.sub('^(/?)http(s?)://', '', URI, count=1)
     URI = URI.replace('/..', '')
@@ -35,7 +36,7 @@ def checkExpired(cachePath):
                     #split as 2 parts the second is date string strip() to remove sapve and
                     #parsedate_to_datetime change to datetime type
                     expireTime = parsedate_to_datetime(line.split(":", 1)[1].strip())
-                    now = datetime.datetime.utcnow().replace(tzinfo=expireTime.tzinfo)
+                    now = datetime.now(timezone.utc)
                     return now >= expireTime
                 except:
                     return True
@@ -116,6 +117,38 @@ def GetHrefSrc(htmlContent):
     srcPart = re.findall(r'src=["\'](http[s]?://[^"\']+)["\']', htmlContent)
     return hrefPart + srcPart
 
+def SaveHttpPage(url):
+    cachePath= getCachefromPath(url)
+    #check wheteher exist
+    if os.path.exists(cachePath):
+        return
+    #get url
+    URI =re.sub('^(/?)http(s?)://', '', url, count=1)
+    parts =URI.split('/', 1)
+    hostname= parts[0]
+    resource = '/' + parts[1] if len(parts) == 2 else '/'
+
+    createSocket =socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #createSocket.settimeout(5)
+    createSocket.connect((hostname, 80))
+
+    request =f"GET {resource} HTTP/1.1\r\nHost: {hostname}\r\nConnection: close\r\n\r\n"
+    createSocket.sendall(request.encode())
+
+    response = b""
+    while True:
+        data =createSocket.recv(4096)
+        if not data:
+            break
+        response += data
+    createSocket.close()
+
+    headerEnd  =response.find(b"\r\n\r\n")
+    if headerEnd  != -1:
+        splitHeader = response[:headerEnd ].decode().split("\r\n")
+        body = response[headerEnd  + 4:]
+        saveHeader(cachePath , body,splitHeader)
+        print(f"Find : {url}")
 
 if __name__ == "__main__":
     if len(sys.argv) <= 2:
