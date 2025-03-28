@@ -7,10 +7,10 @@ import datetime
 from datetime import datetime, timezone
 
 
-def getCachefromPath(URI):
-    URI = re.sub('^(/?)http(s?)://', '', URI, count=1)
-    URI = URI.replace('/..', '')
-    parts = URI.split('/', 1)
+def getCachefromPath(urlReceive):
+    urlReceive = re.sub('^(/?)http(s?)://', '', urlReceive, count=1)
+    urlReceive = urlReceive.replace('/..', '')
+    parts = urlReceive.split('/', 1)
     hostname = parts[0]
     resource = '/'
     if len(parts) == 2:
@@ -118,12 +118,20 @@ def getRequest(cS, url):
     except:
         print("send all error")
 
-    headerEnd  = response.find(b"\r\n\r\n")
-    if headerEnd  != -1:
-        splitHeader = response[:headerEnd ].decode().split("\r\n")
-        body = response[headerEnd  + 4:]
+    headerEnd  =response.find(b"\r\n\r\n")
+    if headerEnd  !=-1:
+        splitHeader =response[:headerEnd ].decode().split("\r\n")
+        body =response[headerEnd  + 4:]
         saveHeader(cachePath , body,splitHeader)
-        #finish to write
+        #if get html page
+        #check whether ave html in respinse text
+        if b"text/html" in splitHeader:
+            #string
+            htmlPart =body.decode()
+            linkPart =GetHrefSrc(htmlPart)
+            for link in linkPart:
+                SaveHttpPage(link)
+            #finish to write
     cS.shutdown(socket.SHUT_WR)
 #Look for "href=" and "src=" in the HTML. (2 marks)
 
@@ -138,8 +146,8 @@ def SaveHttpPage(url):
     if os.path.exists(cachePath):
         return
     #get url
-    URI =re.sub('^(/?)http(s?)://', '', url, count=1)
-    parts =URI.split('/', 1)
+    urlReceive =re.sub('^(/?)http(s?)://', '', url, count=1)
+    parts =urlReceive.split('/', 1)
     hostname= parts[0]
     resource = '/' + parts[1] if len(parts) == 2 else '/'
 
@@ -158,7 +166,7 @@ def SaveHttpPage(url):
         response += data
     createSocket.close()
 
-    headerEnd  =response.find(b"\r\n\r\n")
+    headerEnd =response.find(b"\r\n\r\n")
     if headerEnd  != -1:
         splitHeader = response[:headerEnd ].decode().split("\r\n")
         body = response[headerEnd  + 4:]
