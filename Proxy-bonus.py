@@ -111,6 +111,11 @@ def getRequest(cS, url):
     cS.shutdown(socket.SHUT_WR)
 #Look for "href=" and "src=" in the HTML. (2 marks)
 
+def GetHrefSrc(htmlContent):
+    hrefPart = re.findall(r'href=["\'](http[s]?://[^"\']+)["\']', htmlContent)
+    srcPart = re.findall(r'src=["\'](http[s]?://[^"\']+)["\']', htmlContent)
+    return hrefPart + srcPart
+
 
 if __name__ == "__main__":
     if len(sys.argv) <= 2:
