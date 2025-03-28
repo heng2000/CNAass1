@@ -5,6 +5,8 @@ import socket
 import sys
 import datetime
 from datetime import datetime, timezone
+
+
 def getCachefromPath(URI):
     URI = re.sub('^(/?)http(s?)://', '', URI, count=1)
     URI = URI.replace('/..', '')
@@ -38,19 +40,26 @@ def checkExpired(cachePath):
                     expireTime = parsedate_to_datetime(line.split(":", 1)[1].strip())
                     now = datetime.now(timezone.utc)
                     return now >= expireTime
-                except:
+                except Exception:
                     return True
+    #expired if nothing match
     return True
 
 def saveHeader(cachePath, responseContent, responsHeader):
     #GET THE CACHE PATH ADN wirte in the file content
-    with open(cachePath, 'wb') as f:
-        f.write(responseContent)
+    try:
+        with open(cachePath, 'wb') as f:
+            f.write(responseContent)
+    except:
+        print("can not write to cache fielcontent")
     #file header 
     headerPath = cachePath +"header"
-    with open(headerPath, 'w') as f:
-        for header in responsHeader:
-            f.write(header + "\n")
+    try:
+        with open(headerPath, 'w') as f:
+            for line in responsHeader:
+                f.write(line + "\n")
+    except:
+        print("can not write to cache header")
 
 
 #get client socket and url
@@ -58,10 +67,13 @@ def getRequest(cS, url):
     cachePath = getCachefromPath(url)
     #check whether cache is exist
     if os.path.exists(cachePath) and not checkExpired(cachePath):
-        with open(cachePath, 'rb') as f:
-            cS.sendall(f.read())
-        print("from cache")
-        return
+        try:
+            with open(cachePath, 'rb') as f:
+                cS.sendall(f.read())
+            print("read")
+            return
+        except:
+            print("fail to read getRequest()")
     #cache does not exist or overdate
     print("from origin server")
 
@@ -101,7 +113,10 @@ def getRequest(cS, url):
         response += data
     originServerSocket.close()
     #send to client
-    cS.sendall(response)
+    try:
+        cS.sendall(response)
+    except:
+        print("send all error")
 
     headerEnd  = response.find(b"\r\n\r\n")
     if headerEnd  != -1:
@@ -152,8 +167,8 @@ def SaveHttpPage(url):
 
 if __name__ == "__main__":
     if len(sys.argv) <= 2:
-        print("do not have enough vars")
-        print("python Proxy-bonus.py <server_ip> <server_port>")
+        print("Not enough arguments.")
+        print("Usage: python Proxy-bonus.py <IP> <Port>")
         sys.exit(1)
 
     host = sys.argv[1]
