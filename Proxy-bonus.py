@@ -3,6 +3,7 @@ import os
 from email.utils import parsedate_to_datetime
 import socket
 import sys
+import datetime
 def getCachefromPath(URI):
     URI = re.sub('^(/?)http(s?)://', '', URI, count=1)
     URI = URI.replace('/..', '')
@@ -34,12 +35,11 @@ def checkExpired(cachePath):
                     #split as 2 parts the second is date string strip() to remove sapve and
                     #parsedate_to_datetime change to datetime type
                     expireTime = parsedate_to_datetime(line.split(":", 1)[1].strip())
-                    now = int(time.time())
+                    now = datetime.datetime.utcnow().replace(tzinfo=expireTime.tzinfo)
                     return now >= expireTime
                 except:
                     return True
     return True
-
 
 def saveHeader(cachePath, responseContent, responsHeader):
     #GET THE CACHE PATH ADN wirte in the file content
@@ -109,7 +109,7 @@ def getRequest(cS, url):
         saveHeader(cachePath , body,splitHeader)
         #finish to write
     cS.shutdown(socket.SHUT_WR)
-
+#Look for "href=" and "src=" in the HTML. (2 marks)
 
 
 if __name__ == "__main__":
