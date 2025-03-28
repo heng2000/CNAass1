@@ -197,3 +197,18 @@ if __name__ == "__main__":
         except Exception as e:
             print("ero check error message", e)
         client_socket.close()
+
+        C:\Users\lenovo\Desktop\CNA\CNAass1>curl -iS "http://localhost:8080/http://httpbin.org/cache/"
+HTTP/1.1 404 NOT FOUND
+Date: Fri, 28 Mar 2025 03:43:46 GMT
+Content-Type: text/html
+Content-Length: 233
+Connection: close
+Server: gunicorn/19.9.0
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<title>404 Not Found</title>
+<h1>Not Found</h1>
+<p>The requested URL was not found on the server.  If you entered the URL manually please check your spelling and try again.</p>
