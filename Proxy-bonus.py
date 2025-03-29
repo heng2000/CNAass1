@@ -1,3 +1,40 @@
+'''
+task 1 Expires - comment and explanation
+firstly, I save the resource from the origin server. The function getCachefromPath() is used to generate a proper cache path 
+and create the required folders based on the URL.
+
+then, the function saveHeader() is used to store both the response body and headers
+cachePath-for body part
+cachePathheader-for header part
+
+then, the function checkExpired() will be called to open the saved header file, check for Expires field
+and compare it with the current time
+
+if the resource is expired or Expires part does not exist, proxy will get resource for server rather than cache
+
+flow
+1. get form origin server
+2. save cacheheader
+3. get expire time
+4. compare with current time
+5. decide and select
+
+task 2 href/src - comments and explanation
+if proxy finds that the response is an HTML page (by checking whether text/html in response header),
+decode the HTML body
+
+function GetHrefSrc() is used regular expressions to get href and src, to get all starting with href and src,, then calls SaveHttpPage() to download and cache the resource
+
+These resources are cached only not sent back to the client
+flow
+1. find text/html in header
+2. decode body
+3. GetHrefSrc() to extract all href/src links
+4. each link, call SaveHttpPage()
+5. Cache the resource
+6. print find
+'''
+
 import re
 import os
 from email.utils import parsedate_to_datetime
@@ -128,14 +165,14 @@ def getRequest(cS, url):
         #fix error splitHeader is str but i want is byte
         #always return f
         if any("text/html" in line.lower() for line in splitHeader):
-            #string
+            #change to string so thay GetHrefSrc could be used to check
             htmlPart =body.decode()
             linkPart =GetHrefSrc(htmlPart)
             for link in linkPart:
                 SaveHttpPage(link)
             print("html find")
             #finish to write
-    #cS.shutdown(socket.SHUT_WR)
+
 #Look for "href=" and "src=" in the HTML. (2 marks)
 
 def GetHrefSrc(htmlContent):
@@ -144,23 +181,28 @@ def GetHrefSrc(htmlContent):
     return hrefPart + srcPart
 
 def SaveHttpPage(url):
+    #print(f"Find : {url}")
+    #create folder
     cachePath= getCachefromPath(url)
     #check wheteher exist
     if os.path.exists(cachePath):
         return
     #get url
+    #user regular remove http:// https:// /
     urlReceive =re.sub('^(/?)http(s?)://', '', url, count=1)
+    #host name part[0] part[1] =resource(.html)
     parts =urlReceive.split('/', 1)
     hostname= parts[0]
-    resource = '/' + parts[1] if len(parts) == 2 else '/'
-
+    #create resuorce route
+    resource = '/' + parts[1]
+    #tcp connection req
     createSocket =socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #createSocket.settimeout(5)
     createSocket.connect((hostname, 80))
-
+    #sednt to 
     request =f"GET {resource} HTTP/1.1\r\nHost: {hostname}\r\nConnection: close\r\n\r\n"
     createSocket.sendall(request.encode())
-
+    #get resoppnse
     response = b""
     while True:
         data =createSocket.recv(4096)
@@ -168,11 +210,13 @@ def SaveHttpPage(url):
             break
         response += data
     createSocket.close()
-
+    #find header and body
     headerEnd =response.find(b"\r\n\r\n")
     if headerEnd  != -1:
-        splitHeader = response[:headerEnd ].decode().split("\r\n")
-        body = response[headerEnd  + 4:]
+        #get header
+        splitHeader =response[:headerEnd ].decode().split("\r\n")
+        body =response[headerEnd  + 4:]
+        #call save to save
         saveHeader(cachePath , body,splitHeader)
         print(f"Find : {url}")
 
